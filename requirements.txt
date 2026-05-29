@@ -1,6 +1,6 @@
 streamlit
 plotly
-clickhouse-driver
+clickhouse-connect
 groq
 sentence-transformers
 python-dotenv
