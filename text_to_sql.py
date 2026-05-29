@@ -7,15 +7,16 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Initialize Groq client
-groq_client = Groq(api_key=os.getenv("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"))
+groq_client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 
 # Initialize ClickHouse client
 ch_client = Client(
-    host='localhost',
-    port=9000,
-    user='default',
-    password='',
-    database='raw'
+    host=os.getenv("CH_HOST"),
+    port=int(os.getenv("CH_PORT", "9440")),
+    user=os.getenv("CH_USER", "default"),
+    password=os.getenv("CH_PASSWORD"),
+    database='raw',
+    secure=True
 )
 
 # Our schema information
