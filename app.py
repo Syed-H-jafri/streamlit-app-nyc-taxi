@@ -2,7 +2,7 @@ import os
 import streamlit as st
 import plotly.express as px
 import pandas as pd
-from clickhouse_driver import Client
+from clickhouse_connect
 from groq import Groq
 from sentence_transformers import SentenceTransformer
 from dotenv import load_dotenv
@@ -19,14 +19,13 @@ st.set_page_config(
 # Initialize clients
 @st.cache_resource
 def init_clients():
-    ch = Client(
+    ch = clickhouse_connect.get_client(
         host=os.getenv("CH_HOST"),
-        port=int(os.getenv("CH_PORT", "9440")),
-        user=os.getenv("CH_USER", "default"),
+        port=8443,
+        username=os.getenv("CH_USER", "default"),
         password=os.getenv("CH_PASSWORD"),
-        database="raw",
         secure=True
-    )
+     )
     groq = Groq(api_key=os.getenv("GROQ_API_KEY"))
     model = SentenceTransformer('all-MiniLM-L6-v2')
     return ch, groq, model
@@ -36,11 +35,13 @@ ch_client, groq_client, embed_model = init_clients()
 # Helper functions
 def run_query(sql):
     try:
-        result = ch_client.execute(sql, with_column_types=True)
-        rows = result[0]
-        columns = [col[0] for col in result[1]]
-        return pd.DataFrame(rows, columns=columns)
+        result = ch_client.query(sql)
+        return pd.DataFrame(
+            result.result_rows,
+            columns=result.column_names
+        )
     except Exception as e:
+        st.error(f"Query error: {str(e)}")
         return None
 
 def generate_sql(question):
@@ -70,11 +71,11 @@ def generate_sql(question):
 
 def similarity_search(question):
     q_embedding = embed_model.encode(question).tolist()
-    results = ch_client.execute(
+    results = ch_client.query(
         "SELECT title, chunk_text, embedding FROM raw.doc_chunks"
     )
     similarities = []
-    for row in results:
+    for row in results.result_rows:
         title, text, embedding = row
         dot = sum(a*b for a,b in zip(q_embedding, embedding))
         mag1 = sum(a*a for a in q_embedding)**0.5
