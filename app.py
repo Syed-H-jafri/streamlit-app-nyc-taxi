@@ -18,6 +18,11 @@ st.set_page_config(
 
 # Initialize clients
 @st.cache_resource
+def init_groq_and_model():
+    groq = Groq(api_key=os.getenv("GROQ_API_KEY"))
+    model = SentenceTransformer('all-MiniLM-L6-v2')
+    return groq, model
+    
 def init_clients():
     ch = clickhouse_connect.get_client(
         host=os.getenv("CH_HOST"),
