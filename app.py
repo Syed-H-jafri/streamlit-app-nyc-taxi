@@ -2,7 +2,7 @@ import os
 import streamlit as st
 import plotly.express as px
 import pandas as pd
-from clickhouse_connect
+import clickhouse_connect
 from groq import Groq
 from sentence_transformers import SentenceTransformer
 from dotenv import load_dotenv
