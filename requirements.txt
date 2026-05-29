@@ -1,0 +1,7 @@
+streamlit
+plotly
+clickhouse-driver
+groq
+sentence-transformers
+python-dotenv
+pandas
